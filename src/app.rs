@@ -1,8 +1,14 @@
+use std::fs;
+
 use crate::config::Config;
 use crate::lexer;
 
 pub fn run(config: Config) {
-    let file_path = config.file;
-    let output_path = "output.txt".to_owned();
-    lexer::lex(file_path, output_path);
+    let file = fs::read_to_string(config.file).expect("Failed to read");
+    let lines = file.lines();
+    let token_string = lexer::lex(lines);
+    println!("{token_string:?}");
+    for tok in token_string {
+        print!("{tok}");
+    }
 }
