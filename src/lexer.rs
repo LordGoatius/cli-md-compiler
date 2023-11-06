@@ -69,16 +69,37 @@ where
     for line in lines {
         token_string.append(&mut lex_line(&line));
     }
-    condense_lex(token_string)
+    condense_lex_3(condense_lex_2(condense_lex_1(token_string)))
 }
 
-fn condense_lex(mut token_string: Vec<Token>) -> Vec<Token> {
-    let _tokn_comparison_vector: Vec<Vec<Token>> = 
-    vec![vec![Token::Code, Token::Code, Token::Code], // Code Block
-         vec![Token::Asterisk, Token::Asterisk],
-         vec![Token::Underscore, Token::Underscore],
-         vec![Token::Exclamation, Token::BracketOpen]];
+fn condense_lex_3(token_string: Vec<Token>) -> Vec<Token> {
+    let mut return_str: Vec<Token> = vec![];
+    for item in token_string.iter().filter(|item| **item != Token::Remove) {
+        return_str.push(item.clone());
+    }
+    return_str
+}
 
+fn condense_lex_2(mut token_string: Vec<Token>) -> Vec<Token> {
+     for (i, win) in token_string.clone().windows(2).enumerate() {
+         if win[0] == Token::Asterisk && win[1] == Token::Asterisk {
+             token_string[i] = Token::Bold;
+             token_string[i + 1] = Token::Remove;
+         } else if win[0] == Token::Underscore && win[1] == Token::Underscore {
+             token_string[i] = Token::Italic;
+             token_string[i + 1] = Token::Remove;
+         } else if win[0] == Token::Exclamation && win[1] == Token::BracketOpen {
+             token_string[i] = Token::ImageOpen;
+             token_string[i + 1] = Token::Remove;
+         }
+         println!("{i}: {win:?}");
+     }
+
+    token_string
+
+}
+
+fn condense_lex_1(mut token_string: Vec<Token>) -> Vec<Token> {
      for (i, win) in token_string.clone().windows(3).enumerate() {
          if win[0] == Token::Code &&
             win[1] == Token::Code &&
