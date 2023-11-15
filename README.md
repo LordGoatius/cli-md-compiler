@@ -4,11 +4,9 @@
 
 ### Installation
 
-> $ git clone https://github.com/LordGoatius/cli-md-compiler
-
-> $ cd cli-md-compiler
-
-> $ cargo build
+>>> $ git clone https://github.com/LordGoatius/cli-md-compiler
+ $ cd cli-md-compiler
+ $ cargo build
 
 You can then take the binary in target/release and add it to the path.
 
