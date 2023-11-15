@@ -1,6 +1,7 @@
 pub mod app;
 pub mod config;
 pub mod lexer;
+pub mod parser;
 
 use crate::config::Config;
 

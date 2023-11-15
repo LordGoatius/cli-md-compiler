@@ -69,7 +69,29 @@ where
     for line in lines {
         token_string.append(&mut lex_line(&line));
     }
-    condense_lex_3(condense_lex_2(condense_lex_1(token_string)))
+    condense_lex_4(condense_lex_3(condense_lex_2(condense_lex_1(token_string))))
+}
+
+fn condense_lex_4(token_string: Vec<Token>) -> Vec<Token> {
+    let mut return_str: Vec<Token> = vec![];
+
+    let mut text_str: String = String::from("");
+
+    for tok in token_string.iter() {
+        if let Token::Text(char) = tok {
+            text_str.push_str(char);
+        } else {
+            if text_str == "" {
+                return_str.push(tok.clone());
+            } else {
+                return_str.push(Token::Text(text_str.clone()));
+                return_str.push(tok.clone());
+                text_str = String::from("");
+            }
+        }
+    }
+
+    return_str
 }
 
 fn condense_lex_3(token_string: Vec<Token>) -> Vec<Token> {
@@ -92,11 +114,9 @@ fn condense_lex_2(mut token_string: Vec<Token>) -> Vec<Token> {
              token_string[i] = Token::ImageOpen;
              token_string[i + 1] = Token::Remove;
          }
-         println!("{i}: {win:?}");
      }
 
     token_string
-
 }
 
 fn condense_lex_1(mut token_string: Vec<Token>) -> Vec<Token> {
@@ -108,7 +128,6 @@ fn condense_lex_1(mut token_string: Vec<Token>) -> Vec<Token> {
              token_string[i + 1] = Token::Remove;
              token_string[i + 2] = Token::Remove;
          }
-         println!("{i}: {win:?}");
      }
 
     token_string
