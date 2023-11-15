@@ -1,15 +1,24 @@
-###### Jimmy's Markdown Compiler for CLI Output
+###### Jimmy's Markdown Compiler for CLI Output UNFINISHED
 
 > Markdown compiler for CLI
 
 ### Installation
 
->>> $ git clone https://github.com/LordGoatius/cli-md-compiler
- $ cd cli-md-compiler
+> $ git clone https://github.com/LordGoatius/cli-md-compiler \
+ $ cd cli-md-compiler \
  $ cargo build
 
 You can then take the binary in target/release and add it to the path.
 
+### Usage
+
+The program is overall quite simple.
+
+By running 
+
+> $ mdcli README.md 
+
+the program will compile the Markdown into the most human readable unicode file, and output it to stdout.
 
 ### Overview
 
