@@ -1,8 +1,10 @@
-use std::fmt::{self, Display};
+use std::{fmt::{self, Display, write}, slice::Windows};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
     Text(String),
+    Image(String, String),
+    Link(String, String),
     Asterisk,
     Underscore,
     Newline,
@@ -33,6 +35,8 @@ impl Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Token::Text(value) => write!(f, "{value}"),
+            Token::Image(alt, path) => write!(f, "![{alt}!]({path})"),
+            Token::Link(text, path) => write!(f, "[{text}]({path})"),
             Token::Newline => write!(f, "\n"),
             Token::Header => write!(f, "#"),
             Token::Asterisk => write!(f, "*"),
@@ -69,7 +73,55 @@ where
     for line in lines {
         token_string.append(&mut lex_line(&line));
     }
-    condense_lex_4(condense_lex_3(condense_lex_2(condense_lex_1(token_string))))
+    remove(
+    img_link(
+    asterisk_elimination(
+    condense_lex_4(
+    remove(
+    condense_lex_2(
+    condense_lex_1(token_string)))))))
+}
+
+fn img_link(mut token_string: Vec<Token>) -> Vec<Token> {
+    for (i, win) in token_string.clone().windows(6).enumerate() {
+        if let [Token::BracketOpen, 
+                Token::Text(text), 
+                Token::BracketClose, 
+                Token::ParenthesisOpen, 
+                Token::Text(link), 
+                Token::ParenthesisClose] 
+            = win {
+                token_string[i] = Token::Link(text.clone(), link.clone());
+                token_string[i + 1] = Token::Remove;
+                token_string[i + 2] = Token::Remove;
+                token_string[i + 3] = Token::Remove;
+                token_string[i + 4] = Token::Remove;
+                token_string[i + 5] = Token::Remove;
+            } else if let [Token::ImageOpen, 
+                Token::Text(text), 
+                Token::ImageClose, 
+                Token::ParenthesisOpen, 
+                Token::Text(link), 
+                Token::ParenthesisClose] 
+            = win {
+                token_string[i] = Token::Image(text.clone(), link.clone());
+                token_string[i + 1] = Token::Remove;
+                token_string[i + 2] = Token::Remove;
+                token_string[i + 3] = Token::Remove;
+                token_string[i + 4] = Token::Remove;
+                token_string[i + 5] = Token::Remove;
+        }
+    }
+    token_string
+}
+
+fn asterisk_elimination(mut token_string: Vec<Token>) -> Vec<Token> {
+    for (i, tok) in token_string.clone().iter().enumerate() {
+        if let Token::Asterisk = tok {
+            token_string[i] = Token::Italic;
+        }
+    }
+    token_string
 }
 
 fn condense_lex_4(token_string: Vec<Token>) -> Vec<Token> {
@@ -94,7 +146,7 @@ fn condense_lex_4(token_string: Vec<Token>) -> Vec<Token> {
     return_str
 }
 
-fn condense_lex_3(token_string: Vec<Token>) -> Vec<Token> {
+fn remove(token_string: Vec<Token>) -> Vec<Token> {
     let mut return_str: Vec<Token> = vec![];
     for item in token_string.iter().filter(|item| **item != Token::Remove) {
         return_str.push(item.clone());
@@ -113,6 +165,9 @@ fn condense_lex_2(mut token_string: Vec<Token>) -> Vec<Token> {
          } else if win[0] == Token::Exclamation && win[1] == Token::BracketOpen {
              token_string[i] = Token::ImageOpen;
              token_string[i + 1] = Token::Remove;
+         } else if win[0] == Token::Exclamation && win[1] == Token::BracketClose {
+             token_string[i] = Token::ImageClose;
+             token_string[i + 1] = Token::Remove;
          }
      }
 
@@ -126,6 +181,13 @@ fn condense_lex_1(mut token_string: Vec<Token>) -> Vec<Token> {
             win[2] == Token::Code {
              token_string[i] = Token::CodeBlock;
              token_string[i + 1] = Token::Remove;
+             token_string[i + 2] = Token::Remove;
+         }
+         if win[0] == Token::Asterisk &&
+            win[1] == Token::Asterisk &&
+            win[2] == Token::Asterisk {
+             token_string[i] = Token::Bold;
+             token_string[i + 1] = Token::Italic;
              token_string[i + 2] = Token::Remove;
          }
      }
